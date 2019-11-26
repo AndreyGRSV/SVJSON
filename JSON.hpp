@@ -330,7 +330,7 @@ public:
 	}
 	virtual ~JSONArray()
 	{
-		for (int i = 0; i < m_Values.size(); i++)
+		for (std::size_t i = 0; i < m_Values.size(); i++)
 			if (m_Values[i])
 				delete m_Values[i];
 	}
@@ -338,7 +338,7 @@ public:
 
 	JSONObject& GetEmptyObject() { return m_EmptyObject.m_Empty; }
 
-	const JSONElement& operator[](const int _idx) const
+	const JSONElement& operator[](const std::size_t _idx) const
 	{
 		if (_idx >= m_Values.size() )
 			return m_EmptyArray.m_Empty;
