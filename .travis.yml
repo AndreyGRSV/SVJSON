@@ -5,6 +5,10 @@
 # C++ project
 language: cpp
 
+dist: trusty
+sudo: required
+group: edge
+
 matrix:
   include:
     # works on Precise and Trusty
