@@ -1,4 +1,4 @@
-#include "JSON.hpp"
+#include "../JSON.hpp"
 
 int main(int argc, char *argv[])
 {
