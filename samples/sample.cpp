@@ -1,4 +1,5 @@
 #include "../JSON.hpp"
+#include <iostream>
 
 int main(int argc, char *argv[])
 {
@@ -13,5 +14,11 @@ int main(int argc, char *argv[])
     double name4 = psO["name4"];
     const char *name5 = psO["name5"];
 
+    std::cout << "name : " << name << std::endl
+              << "name2 : " << name2 << std::endl
+              << "name3 : " << name3 << std::endl
+              << "name4 : " << name4 << std::endl
+              << "name5 : " << name5 << std::endl;
+	
   return 0;
 }
