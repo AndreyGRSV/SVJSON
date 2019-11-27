@@ -2,7 +2,7 @@
 # SVJSON
 
 [![Build Status](https://travis-ci.org/AndreyGRSV/SVJSON.svg?branch=master)](https://travis-ci.org/AndreyGRSV/SVJSON)
-
+[![GitHub](https://img.shields.io/github/license/AndreyGRSV/SVJSON?color=blue) (https://github.com/AndreyGRSV/SVJSON/blob/master/LICENSE)]
 
 
 Simple for use JSON parser in one file
