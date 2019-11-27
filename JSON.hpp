@@ -18,10 +18,6 @@
 #include <map>	
 #endif
 
-#ifndef _UNORDERED_MAP_
-#include <unordered_map>
-#endif
-
 #ifndef _VECTOR_
 #include <vector>	
 #endif
