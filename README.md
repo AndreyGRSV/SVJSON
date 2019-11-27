@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/AndreyGRSV/SVJSON.svg?branch=master)](https://travis-ci.org/AndreyGRSV/SVJSON)
 [![GitHub](https://img.shields.io/github/license/AndreyGRSV/SVJSON?color=blue)](https://github.com/AndreyGRSV/SVJSON/blob/master/LICENSE)
-[![Minimum C++ Standard](https://img.shields.io/badge/standard-C%2B%2B98-blue)] (https://img.shields.io/badge/standard-C%2B%2B98-blue)
+![Minimum C++ Standard] (https://img.shields.io/badge/standard-C%2B%2B98-blue)
 
 
 Simple for use JSON parser in one file
