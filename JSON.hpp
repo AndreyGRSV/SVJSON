@@ -18,6 +18,10 @@
 #include <map>	
 #endif
 
+#ifndef _UNORDERED_MAP_
+#include <unordered_map>
+#endif
+
 #ifndef _VECTOR_
 #include <vector>	
 #endif
@@ -80,6 +84,10 @@ protected:
 	std::size_t m_Pos;
 	const std::string& m_sJSON;
 	JSONEmpty<std::string> m_EmptyString;
+
+	JSONEmpty<JSONArray> m_EmptyArray;
+	JSONEmpty<JSONObject> m_EmptyObject;
+
 public:
 	JSONElement (const std::string& sJSON, std::size_t pos = 0) : m_Pos(pos), m_sJSON(sJSON) { }
 	JSONElement() : m_Pos(0), m_sJSON(m_EmptyString.m_Empty) 
@@ -321,9 +329,6 @@ class JSONArray : public virtual JSONGroup<void>
 {
 	std::vector<const JSONElement*> m_Values;
 
-	JSONEmpty<JSONArray> m_EmptyArray;
-	JSONEmpty<JSONObject> m_EmptyObject;
-
 	JSONArray (JSONArray&) {}
 public:
 	JSONArray () 
@@ -334,7 +339,7 @@ public:
 	}
 	virtual ~JSONArray()
 	{
-		for (std::size_t i = 0; i < m_Values.size(); i++)
+		for (int i = 0; i < m_Values.size(); i++)
 			if (m_Values[i])
 				delete m_Values[i];
 	}
@@ -342,7 +347,7 @@ public:
 
 	JSONObject& GetEmptyObject() { return m_EmptyObject.m_Empty; }
 
-	const JSONElement& operator[](const std::size_t _idx) const
+	const JSONElement& operator[](const int _idx) const
 	{
 		if (_idx >= m_Values.size() )
 			return m_EmptyArray.m_Empty;
@@ -413,9 +418,6 @@ class JSONObject : public virtual JSONGroup<void>
 			   delete _val.second;
 	   }
    };
-
-    JSONEmpty<JSONObject> m_EmptyObject;
-	JSONEmpty<JSONArray> m_EmptyArray;
 
     JSONObject (JSONObject& cObj);
 public:
@@ -577,38 +579,26 @@ template <typename valueT> JSONElement* JSONGroup<T>::ParseType (
 
 inline JSONElement::operator JSONObject& () const 
 {	
-	if (typeid(*this) == typeid(JSONArray))
-	{
-		JSONArray& rA = dynamic_cast<JSONArray&>(const_cast<JSONElement&>(*this));
-		return rA.GetEmptyObject();
-	}
+	if (typeid(*this) != typeid(JSONObject))
+		return this->m_EmptyObject.m_Empty;
 	return dynamic_cast<JSONObject&>(const_cast<JSONElement&>(*this));
 }
 inline const JSONElement& JSONElement::operator[](const char* name) const 
 {	
-	if (typeid(*this) == typeid(JSONArray))
-	{
-		JSONArray& rA = dynamic_cast<JSONArray&>(const_cast<JSONElement&>(*this));
-		return rA.GetEmptyObject();
-	}
+	if (typeid(*this) != typeid(JSONObject))
+		return this->m_EmptyObject.m_Empty;
 	return dynamic_cast<const JSONObject&>(*this)[name];
 }
 inline const JSONElement& JSONElement::operator[](const int idx) const 
 { 
-	if (typeid(*this) == typeid(JSONObject))
-	{
-		JSONObject& rO = dynamic_cast<JSONObject&>(const_cast<JSONElement&>(*this));
-		return rO.GetEmptyArray();
-	}
+	if (typeid(*this) != typeid(JSONArray))
+		return this->m_EmptyArray.m_Empty;
 	return dynamic_cast<const JSONArray&>(*this)[idx];
 }
 inline JSONElement::operator JSONArray& () const
 { 	
-	if (typeid(*this) == typeid(JSONObject))
-	{
-		JSONObject& rO = dynamic_cast<JSONObject&>(const_cast<JSONElement&>(*this));
-		return rO.GetEmptyArray();
-	}
+	if (typeid(*this) != typeid(JSONArray))
+		return this->m_EmptyArray.m_Empty;
 	return dynamic_cast<JSONArray&>(const_cast<JSONElement&>(*this));
 }
 
