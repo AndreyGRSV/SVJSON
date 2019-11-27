@@ -34,6 +34,9 @@
 #include <algorithm>
 #endif
 
+#include <cstring>
+#include <memory>
+
 #if __cplusplus < 201103L 
 #if !defined _MSC_VER || (defined(_MSC_VER) && _MSC_VER < 1900) 
 namespace sag
@@ -56,6 +59,7 @@ using namespace sag;
 using namespace std;
 #endif
 #else
+using namespace std;
 #endif
 
 
