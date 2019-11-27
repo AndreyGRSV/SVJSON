@@ -1,4 +1,10 @@
+
 # SVJSON
+
+[![Build Status](https://travis-ci.org/AndreyGRSV/SVJSON.svg?branch=master)](https://travis-ci.org/AndreyGRSV/SVJSON)
+
+
+
 Simple for use JSON parser in one file
 
 ```C++
