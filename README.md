@@ -3,12 +3,14 @@
 
 [![Build Status](https://travis-ci.org/AndreyGRSV/SVJSON.svg?branch=master)](https://travis-ci.org/AndreyGRSV/SVJSON)
 [![GitHub](https://img.shields.io/github/license/AndreyGRSV/SVJSON?color=blue)](https://github.com/AndreyGRSV/SVJSON/blob/master/LICENSE)
+[[Minimum C++ Standard](https://img.shields.io/badge/standard-C%2B%2B98-blue)]
 
 
 Simple for use JSON parser in one file
 
 ```C++
 #include "JSON.hpp"
+#include <iostream>
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +25,12 @@ int main(int argc, char *argv[])
     double name4 = psO["name4"];
     const char *name5 = psO["name5"];
 
+    std::cout << "name : " << name << std::endl
+              << "name2 : " << name2 << std::endl
+              << "name3 : " << name3 << std::endl
+              << "name4 : " << name4 << std::endl
+              << "name5 : " << name5 << std::endl;
+	
   return 0;
 }
-
 ```
