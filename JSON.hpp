@@ -1,9 +1,9 @@
 /*
- *  
+ *  Simple JSON parser for embedded systems
  *
  *
  *
- *
+ *  Created by Andrey Svyatovets
  *
  */
 
@@ -76,6 +76,13 @@ class JSONArray;
 
 class JSONElement
 {
+	template <class Ti> typename enable_if< is_same<Ti, std::string>::value, std::string>::type getTypeValue() const;
+	template <class Ti> typename enable_if< is_same<Ti, const char*>::value, const char*>::type getTypeValue() const;
+	template <class Ti> typename enable_if< is_same<Ti, bool>::value, bool>::type getTypeValue() const;
+	template <class Ti> typename enable_if< is_same<Ti, double>::value, double>::type getTypeValue() const;
+
+	JSONElement& operator = (const JSONElement&);
+
 protected:
 	std::size_t m_Pos;
 	const std::string& m_sJSON;
@@ -95,9 +102,6 @@ public:
 		m_Pos = m_sJSON.find_first_not_of (" \t\n\r", m_Pos);
 		return m_Pos;
 	}
-	template <class Ti> typename enable_if< is_same<Ti, std::string>::value, std::string>::type getTypeValue() const;
-	template <class Ti> typename enable_if< is_same<Ti, const char*>::value, const char*>::type getTypeValue() const;
-	template <class Ti> typename enable_if< is_same<Ti, double>::value, double>::type getTypeValue() const;
 
 	template <class Ti> operator Ti () const { return getTypeValue<Ti>(); }
 
@@ -112,7 +116,7 @@ class JSONStaticString : public virtual JSONElement
 	const char* m_pValue;
 
 	struct ToLower {
-		char operator ()(char& c) { return std::tolower(c); }
+		char operator ()(char& c) { return (char)std::tolower(c); }
 	};
 
 	std::string to_lower (const std::string& val)
@@ -127,6 +131,9 @@ public:
 	JSONStaticString (const std::string& sJSON, std::size_t pos, const char* static_value) : JSONElement (sJSON, pos)
 		, m_pValue(static_value)	
 	{ 
+	}
+	JSONStaticString() : JSONElement(), m_pValue(NULL)
+	{
 	}
 	const char* getValue () const { return m_pValue; }
 	virtual std::size_t parse()
@@ -153,6 +160,9 @@ public:
 	JSONString (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos)
 	{
 	}
+	JSONString () : JSONElement()
+	{
+	}
 	const std::string& getValue () const { return m_Value; }
 	operator std::string() { return m_Value; }
 	virtual std::size_t parse()
@@ -164,25 +174,22 @@ public:
 		if (m_sJSON[m_Pos] == '"')
 		{
 			m_Pos++;
-			//std::size_t start_pos = m_Pos;
-			std::string value;
 			while (true)
 			{
 				std::size_t start_pos = m_Pos;
 				m_Pos = m_sJSON.find_first_of ("\\\"", m_Pos);
 				if (m_Pos == std::string::npos)
 					return m_Pos; // Did not have closed quotes
-				value += m_sJSON.substr(start_pos, m_Pos - start_pos);
+				m_Value += m_sJSON.substr(start_pos, m_Pos - start_pos);
 				if (m_sJSON[m_Pos] == '\\')
 				{
 					m_Pos++; 
-					value += m_sJSON[m_Pos];
+					m_Value += m_sJSON[m_Pos];
 					m_Pos++; // Skip symbol after slash
 				}
 				else
 					break;
 			} 
-			m_Value = value; //m_sJSON.substr(start_pos, m_Pos - start_pos);
 			m_Pos++;
 			return m_Pos;
 		}
@@ -203,6 +210,9 @@ class JSONNumber : public virtual JSONElement
 public:
 	JSONNumber (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos)
 		, m_Value(0)
+	{
+	}
+	JSONNumber() : JSONElement(), m_Value(0.0) 
 	{
 	}
 	double getValue () const { return m_Value; }
@@ -323,7 +333,9 @@ public:
 
 class JSONArray : public virtual JSONGroup<void>
 {
-	std::vector<const JSONElement*> m_Values;
+	typedef std::vector<const JSONElement*> ArrayType;
+
+	ArrayType m_Values;
 
 	JSONArray (JSONArray&) {}
 public:
@@ -335,15 +347,13 @@ public:
 	}
 	virtual ~JSONArray()
 	{
-		for (std::size_t i = 0; i < m_Values.size(); i++)
+		for (ArrayType::size_type i = 0; i < m_Values.size(); i++)
 			if (m_Values[i])
 				delete m_Values[i];
 	}
-	std::vector<const JSONElement*>& getValues () { return m_Values; }
+	const ArrayType& getValues () const { return m_Values; }
 
-	JSONObject& GetEmptyObject() { return m_EmptyObject.m_Empty; }
-
-	const JSONElement& operator[](const std::size_t _idx) const
+	const JSONElement& operator[](const ArrayType::size_type _idx) const
 	{
 		if (_idx >= m_Values.size() )
 			return m_EmptyArray.m_Empty;
@@ -402,7 +412,6 @@ public:
 
 class JSONObject : public virtual JSONGroup<void>
 {
-	//typedef std::unordered_map <std::string, const JSONElement*> DOMType;
 	typedef std::map <std::string, const JSONElement*> DOMType;
 	DOMType m_Values;
 
@@ -418,7 +427,7 @@ class JSONObject : public virtual JSONGroup<void>
     JSONObject (JSONObject& cObj);
 public:
 	JSONObject () { }
-	JSONObject (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos), JSONGroup<void> (sJSON, pos)
+	JSONObject (const std::string& sJSON, std::size_t pos) : JSONGroup<void> (sJSON, pos), JSONElement (sJSON, pos)
 	{
 	}
 	virtual ~JSONObject ()
@@ -427,8 +436,6 @@ public:
 		std::for_each (m_Values.begin(), m_Values.end(), dv);
 	}
 	const DOMType& getValues () const { return m_Values; }
-
-	JSONArray& GetEmptyArray() { return m_EmptyArray.m_Empty; }
 
 	const JSONObject& GetObject (const char* name) const
 	{
@@ -450,11 +457,6 @@ public:
 		}
 		return m_EmptyObject.m_Empty;
 	}
-	//const JSONElement* operator[](const char* name) const
-	//{
-	//	return const_cast<std::map <std::string, const JSONElement*>&>(m_Values)[name];
-	//}
-
 	virtual std::size_t parse()
 	{
 		// Witespace
@@ -528,6 +530,15 @@ template <class Ti> typename enable_if< is_same<Ti, const char*>::value, const c
 	if (typeid(*this) != typeid(JSONStaticString))
 		return "";
 	return dynamic_cast<const JSONStaticString&>(*this).getValue();
+}
+template <class Ti> typename enable_if< is_same<Ti, bool>::value, bool>::type JSONElement::getTypeValue() const
+{
+	if (typeid(*this) != typeid(JSONStaticString))
+		return false;
+	const char* ps = dynamic_cast<const JSONStaticString&>(*this).getValue();
+	if (std::string(ps) == "true")
+		return true;
+	return false;
 }
 template <class Ti> typename enable_if< is_same<Ti, double>::value, double>::type JSONElement::getTypeValue() const
 {
