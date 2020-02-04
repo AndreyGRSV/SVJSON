@@ -36,6 +36,14 @@ int main(int argc, char *argv[])
 
 This parser uses only standard containers for building data tree. For arrays are used std::vector and for objects std::map with std::string as key values. This more safe then use own containers.
 
+```C++
+// Read all items from object
+for (auto item : obj.getValues())
+{
+  ...
+}
+```
+
 Parsing is only first step of the whole process. Performance of parsing can take more time but finding value in the data tree can compensate this disadvantage. Especially if finding is very frequent process.
 
 If you got the JSON string with errors or with absent data the program is not throwing exception and not setting any error. In error or absence data case the program returns empty result. For string it will be empty string (“”), for number value it will be zero (0.0), for boolean – false and for null – null (“null”). If data are mandatory and they are absent you can use it for application level error detection.
@@ -51,3 +59,31 @@ Conclution.
 -	Simple intuitive usage with overloaded operator [].
 -	Used well-known standard containers.
 -	Did not overloaded nonstandard own api for modification and serialization.
+
+
+# How to read unknown data?
+
+```C++
+// Helper template for unknown JSON
+template <typename Tc> class Elem
+{
+	const Tc* pelem;		// Pointer to element in JSON parsed structure 
+	JSONEmpty<Tc> empty;	// Empty object for safety return
+	// Type cast to reference overloading
+	operator const Tc&() const
+	{
+		if (pelem)
+			return (*pelem);	// Return real elemnt
+		return empty.m_Empty;	// Return empty object apropriate type of elemnt
+	}
+public:
+	// Initialize pointer to element 
+	Elem (const JSONElement *el) : pelem (dynamic_cast<const Tc*>(el))
+	{
+	}
+	// Casting is succefull or not
+	bool is_empty() const { return (pelem == NULL); }
+	// Getting the element through casting operator
+	const Tc& get_elem() const { return *this; }
+};
+```
