@@ -427,7 +427,7 @@ class JSONObject : public virtual JSONGroup<void>
     JSONObject (JSONObject& cObj);
 public:
 	JSONObject () { }
-	JSONObject (const std::string& sJSON, std::size_t pos) : JSONGroup<void> (sJSON, pos), JSONElement (sJSON, pos)
+	JSONObject (const std::string& sJSON, std::size_t pos) :  JSONElement (sJSON, pos), JSONGroup<void> (sJSON, pos)
 	{
 	}
 	virtual ~JSONObject ()
