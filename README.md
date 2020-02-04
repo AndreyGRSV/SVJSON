@@ -60,7 +60,6 @@ Program supported compilation starting from C++ 98 standard. It can be used for 
   -Used well-known standard containers.
   -Did not overloaded nonstandard own api for modification and serialization.
 
-
 ## How to read unknown object data
 
 ```C++
