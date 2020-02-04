@@ -61,7 +61,7 @@ Program supported compilation starting from C++ 98 standard. It can be used for 
 -	Did not overloaded nonstandard own api for modification and serialization.
 
 
-### How to read unknown data?
+### How to read unknown object data?
 
 ```C++
 // Helper template for unknown JSON
@@ -86,4 +86,33 @@ public:
 	// Getting the element through casting operator
 	const Tc& get_elem() const { return *this; }
 };
+```
+Read all data from object
+
+```C++
+for (auto item : obj.getValues())
+{
+	// item.first pointed to name
+	// item.second pointed to value
+	
+	// Try as JSONString element
+	Elem<JSONString> str(item.second); 
+	// Empty object returns empty string
+	if (str.get_elem().getValue() != "") // Is not empy print value
+		cout << str.get_elem().getValue(); 
+		
+	// Try as JSONStaticString element
+	Elem<JSONStaticString> sstr(item.second);
+	// Empty object returns pointer to NULL
+	if (sstr.get_elem().getValue() != NULL) // Is not empy print value
+		cout << sstr.get_elem().getValue(); 
+		
+	// Try as JSONNumber element
+	Elem<JSONNumber> num(item.second);
+	// Empty object returns sero
+	if (num.get_elem().getValue() != 0) // Is not zero print value
+		cout << num.get_elem().getValue(); 
+		
+	cout << endl;
+}
 ```
