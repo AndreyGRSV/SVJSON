@@ -35,11 +35,16 @@ int main(int argc, char *argv[])
 ```
 
 This parser uses only standard containers for building data tree. For arrays are used std::vector and for objects std::map with std::string as key values. This more safe then use own containers.
+
 Parsing is only first step of the whole process. Performance of parsing can take more time but finding value in the data tree can compensate this disadvantage. Especially if finding is very frequent process.
+
 If you got the JSON string with errors or with absent data the program is not throwing exception and not setting any error. In error or absence data case the program returns empty result. For string it will be empty string (“”), for number value it will be zero (0.0), for boolean – false and for null – null (“null”). If data are mandatory and they are absent you can use it for application level error detection.
+
 Parser is not serialize data tree to JSON string. For this purpose can be used any standard mechanism, such as std::string or std::stringstream. In any case data from parsed JSON can be used for formatting new JSON string.
 The data in data tree are not modifiable.
+
 Program supported compilation starting from C++ 98 standard. It can be used for some old compilers for embedded systems like armcc 4.x for example.
+
 Conclution.
 -	Supports wide specter of compilers.
 -	Easy adding to project.
