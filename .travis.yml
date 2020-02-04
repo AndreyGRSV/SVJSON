@@ -20,7 +20,7 @@ matrix:
           packages:
             - g++-4.9
       env:
-         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && OPT=-std=c++98"
          
     - os: linux
       addons:
@@ -38,5 +38,5 @@ matrix:
         - MATRIX_EVAL="brew install gcc && CC=gcc-7 && CXX=g++-7"
         
 script:
-  - $CXX samples/sample.cpp -o samples/sample -Wall
+  - $CXX $OPT samples/sample.cpp -o samples/sample -Wall
   - ./samples/sample
