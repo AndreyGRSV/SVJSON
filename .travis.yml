@@ -23,4 +23,5 @@ matrix:
          - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
 
 script:
-  - g++ samples/sample.cpp -Wall
+  - g++ samples/sample.cpp -o samples/sample -Wall
+  - ./samples/sample
