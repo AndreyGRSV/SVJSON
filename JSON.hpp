@@ -36,6 +36,7 @@
 
 #include <cstring>
 #include <memory>
+#include <cstdlib>
 
 #if __cplusplus < 201103L 
 #if !defined _MSC_VER || (defined(_MSC_VER) && _MSC_VER < 1900) 
