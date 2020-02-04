@@ -32,5 +32,5 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 script:
-  - $CC samples/sample.cpp -o samples/sample -Wall
+  - $CXX samples/sample.cpp -o samples/sample -Wall
   - ./samples/sample
