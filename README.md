@@ -55,11 +55,11 @@ The data in data tree are not modifiable.
 Program supported compilation starting from C++ 98 standard. It can be used for some old compilers for embedded systems like armcc 4.x for example.
 
 ## Conclution
-- Supports wide specter of compilers.
-- Easy adding to project.
-- Simple intuitive usage with overloaded operator [].
-- Used well-known standard containers.
-- Did not overloaded nonstandard own api for modification and serialization.
+-  Supports wide specter of compilers.
+-  Easy adding to project.
+-  Simple intuitive usage with overloaded operator [].
+-  Used well-known standard containers.
+-  Did not overloaded nonstandard own api for modification and serialization.
 
 ## How to read unknown object data
 
