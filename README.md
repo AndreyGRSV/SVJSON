@@ -6,6 +6,7 @@
 [![GitHub](https://img.shields.io/github/license/AndreyGRSV/SVJSON?color=blue)](https://github.com/AndreyGRSV/SVJSON/blob/master/LICENSE)
 [![Minimum C++ Standard](https://img.shields.io/badge/standard-C%2B%2B98-blue)](https://img.shields.io/badge/standard-C%2B%2B98-blue)
 
+## Usage
 Simple for use JSON parser in one file
 
 ```C++
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
   return 0;
 }
 ```
-
+## Brief description
 This parser uses only standard containers for building data tree. For arrays are used std::vector and for objects std::map with std::string as key values. This more safe then use own containers.
 
 ```C++
@@ -61,7 +62,9 @@ Program supported compilation starting from C++ 98 standard. It can be used for 
 -   Used well-known standard containers.
 -   Did not overloaded nonstandard own api for modification and serialization.
 
-## How to read unknown object data
+## Special cases
+
+### How to read unknown object data
 
 ```C++
 // Helper template for unknown JSON
