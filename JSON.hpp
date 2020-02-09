@@ -84,13 +84,17 @@ class JSONElement
 
 	JSONElement& operator = (const JSONElement&);
 
-protected:
-	std::size_t m_Pos;
-	const std::string& m_sJSON;
 	JSONEmpty<std::string> m_EmptyString;
 
 	JSONEmpty<JSONArray> m_EmptyArray;
 	JSONEmpty<JSONObject> m_EmptyObject;
+
+protected:
+	std::size_t m_Pos;
+	const std::string& m_sJSON;
+
+	const JSONArray& get_EmptyArray() const { return m_EmptyArray.m_Empty; }
+	const JSONObject& get_EmptyObject() const { return m_EmptyObject.m_Empty; }
 
 public:
 	JSONElement (const std::string& sJSON, std::size_t pos = 0) : m_Pos(pos), m_sJSON(sJSON) { }
@@ -356,12 +360,12 @@ public:
 
 	const JSONElement& operator[](const ArrayType::size_type _idx) const
 	{
-		if (_idx >= m_Values.size() )
-			return m_EmptyArray.m_Empty;
+		if (_idx >= m_Values.size())
+			return get_EmptyArray();
 		const JSONElement* pElement = const_cast<std::vector<const JSONElement*>&>(m_Values)[_idx];
 		if (pElement)
 			return *pElement;
-		return m_EmptyArray.m_Empty;
+		return get_EmptyArray();
 	}
 
 	virtual std::size_t parse()
@@ -446,7 +450,7 @@ public:
 			if (pElement)
 				return dynamic_cast<const JSONObject&>(*pElement);
 		}
-		return m_EmptyObject.m_Empty;
+		return get_EmptyObject();
 	}
 	const JSONElement& operator[](const char* name) const
 	{
@@ -456,7 +460,7 @@ public:
 			if (pElement)
 				return *pElement;
 		}
-		return m_EmptyObject.m_Empty;
+		return get_EmptyObject();
 	}
 	virtual std::size_t parse()
 	{
