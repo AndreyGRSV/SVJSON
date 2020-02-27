@@ -320,9 +320,8 @@ class JSONArray : public JSONGroup<void>
 
 	//JSONArray (const JSONArray&);
 public:
-	JSONArray (JSONArray& arr) : JSONGroup<void> (arr.m_sJSON, arr.m_Pos, tArray) 
+	JSONArray (JSONArray& arr) : JSONGroup<void> (arr.m_sJSON, arr.m_Pos, tArray), m_Values(arr.m_Values)
 	{
-		m_Values = arr.m_Values;
 		arr.m_Values.clear();
 	}
 #if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
@@ -422,9 +421,8 @@ class JSONObject : public JSONGroup<void>
    };
 
 public:
-	JSONObject (JSONObject& cObj) : JSONGroup<void> (cObj.m_sJSON, cObj.m_Pos, tObject) 
+	JSONObject (JSONObject& cObj) : JSONGroup<void> (cObj.m_sJSON, cObj.m_Pos, tObject), m_Values (cObj.m_Values)
 	{
-		m_Values = cObj.m_Values;
 		cObj.m_Values.clear();
 	}
 #if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
