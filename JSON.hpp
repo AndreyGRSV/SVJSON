@@ -78,7 +78,7 @@ protected:
 	const JSONObject& get_EmptyObject() const { return m_EmptyObject.m_Empty; }
 
 public:
-	JSONElement (const std::string& sJSON, std::size_t pos, Type type) :  m_Type(type), m_Pos(pos), m_sJSON(sJSON) { }
+	JSONElement (const std::string& sJSON, std::size_t pos, Type type) : m_Type(type), m_Pos(pos), m_sJSON(sJSON) { }
 	JSONElement(Type type) : m_Type(type), m_Pos(0), m_sJSON(m_EmptyString.m_Empty)
 	{
 	}
@@ -91,7 +91,7 @@ public:
 
 	template <class Ti> operator Ti () const { return getTypeValue<Ti>(); }
 
-	const JSONElement& operator[](const std::string&) const;
+	const JSONElement& operator[](const char*) const;
 	const JSONElement& operator[](const int idx) const;
 	operator JSONObject& () const;
 	operator JSONArray& () const;
@@ -421,7 +421,6 @@ class JSONObject : public JSONGroup<void>
 	   }
    };
 
-   //JSONObject (const JSONObject& cObj);
 public:
 	JSONObject (JSONObject& cObj) : JSONGroup<void> (cObj.m_sJSON, cObj.m_Pos, tObject) 
 	{
@@ -452,12 +451,14 @@ public:
 			return static_cast<const JSONObject&>(*pElement);
 		return get_EmptyObject();
 	}
-	inline const JSONElement& operator[](const std::string& name) const
+	inline const JSONElement& operator[](const char* name) const
 	{
-
-		const JSONElement* pElement = const_cast<DOMType&>(m_Values)[name];
-		if (pElement)
-			return *pElement;
+		if (name)
+		{
+			const JSONElement* pElement = const_cast<DOMType&>(m_Values)[name];
+			if (pElement)
+				return *pElement;
+		}
 		return get_EmptyObject();
 	}
 	virtual std::size_t parse()
@@ -581,7 +582,7 @@ inline JSONElement::operator JSONObject& () const
 		return this->m_EmptyObject.m_Empty;
 	return static_cast<JSONObject&>(const_cast<JSONElement&>(*this));
 }
-inline const JSONElement& JSONElement::operator[](const std::string& name) const
+inline const JSONElement& JSONElement::operator[](const char* name) const
 {	
 	if (this->m_Type != tObject)
 		return this->m_EmptyObject.m_Empty;
