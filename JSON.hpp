@@ -78,8 +78,8 @@ protected:
 	const JSONObject& get_EmptyObject() const { return m_EmptyObject.m_Empty; }
 
 public:
-	JSONElement (const std::string& sJSON, std::size_t pos, Type type) : m_Pos(pos), m_sJSON(sJSON), m_Type(type) { }
-	JSONElement(Type type) : m_Pos(0), m_sJSON(m_EmptyString.m_Empty), m_Type(type)
+	JSONElement (const std::string& sJSON, std::size_t pos, Type type) :  m_Type(type), m_Pos(pos), m_sJSON(sJSON) { }
+	JSONElement(Type type) : m_Type(type), m_Pos(0), m_sJSON(m_EmptyString.m_Empty)
 	{
 	}
 	virtual ~JSONElement () {}
