@@ -10,36 +10,16 @@
 #ifndef __JSON_HPP
 #define __JSON_HPP
 
-#ifndef _STRING_
 #include <string>	
-#endif
-
-#ifndef _MAP_
-#include <map>	
-#endif
-
-#ifndef _VECTOR_
 #include <vector>	
-#endif
-
-#ifndef _TYPEINFO
-#include <typeinfo>
-#endif
-
-#ifndef _CCTYPE_
 #include <cctype>
-#endif
-
-#ifndef _ALGORITHM_
 #include <algorithm>
-#endif
-
 #include <cstring>
 #include <memory>
 #include <cstdlib>
 
-#if __cplusplus < 201103L 
-#if !defined _MSC_VER || (defined(_MSC_VER) && _MSC_VER < 1900) 
+#if __cplusplus < 201103L && (!defined _MSC_VER || (defined(_MSC_VER) && _MSC_VER < 1900))
+#include <map>	
 namespace sag
 {
 	template<bool B, class T = void> struct enable_if {};
@@ -57,12 +37,9 @@ namespace sag
 }
 using namespace sag;
 #else
-using namespace std;
+	#include <unordered_map>
+	using namespace std;
 #endif
-#else
-using namespace std;
-#endif
-
 
 template <typename T> struct JSONEmpty
 {
@@ -77,6 +54,10 @@ class JSONArray;
 
 class JSONElement
 {
+protected:
+	typedef enum tagType { tElement, tGroup, tObject, tArray, tNumber, tStaticString, tString } Type;
+
+private:
 	template <class Ti> typename enable_if< is_same<Ti, std::string>::value, std::string>::type getTypeValue() const;
 	template <class Ti> typename enable_if< is_same<Ti, const char*>::value, const char*>::type getTypeValue() const;
 	template <class Ti> typename enable_if< is_same<Ti, bool>::value, bool>::type getTypeValue() const;
@@ -84,10 +65,10 @@ class JSONElement
 
 	JSONElement& operator = (const JSONElement&);
 
-	JSONEmpty<std::string> m_EmptyString;
-
+	JSONEmpty<const std::string> m_EmptyString;
 	JSONEmpty<JSONArray> m_EmptyArray;
 	JSONEmpty<JSONObject> m_EmptyObject;
+	const Type m_Type;
 
 protected:
 	std::size_t m_Pos;
@@ -97,8 +78,8 @@ protected:
 	const JSONObject& get_EmptyObject() const { return m_EmptyObject.m_Empty; }
 
 public:
-	JSONElement (const std::string& sJSON, std::size_t pos = 0) : m_Pos(pos), m_sJSON(sJSON) { }
-	JSONElement() : m_Pos(0), m_sJSON(m_EmptyString.m_Empty) 
+	JSONElement (const std::string& sJSON, std::size_t pos, Type type) : m_Pos(pos), m_sJSON(sJSON), m_Type(type) { }
+	JSONElement(Type type) : m_Pos(0), m_sJSON(m_EmptyString.m_Empty), m_Type(type)
 	{
 	}
 	virtual ~JSONElement () {}
@@ -110,13 +91,13 @@ public:
 
 	template <class Ti> operator Ti () const { return getTypeValue<Ti>(); }
 
-	const JSONElement& operator[](const char* name) const;
+	const JSONElement& operator[](const std::string&) const;
 	const JSONElement& operator[](const int idx) const;
 	operator JSONObject& () const;
 	operator JSONArray& () const;
 };
 
-class JSONStaticString : public virtual JSONElement
+class JSONStaticString : public JSONElement
 {
 	const char* m_pValue;
 
@@ -133,14 +114,14 @@ class JSONStaticString : public virtual JSONElement
 	}
 
 public:
-	JSONStaticString (const std::string& sJSON, std::size_t pos, const char* static_value) : JSONElement (sJSON, pos)
-		, m_pValue(static_value)	
+	JSONStaticString (const std::string& sJSON, std::size_t pos, const char* static_value) : JSONElement (sJSON, pos, tStaticString)
+		, m_pValue(static_value)
 	{ 
 	}
-	JSONStaticString() : JSONElement(), m_pValue(NULL)
+	JSONStaticString() : JSONElement(tStaticString), m_pValue(NULL)
 	{
 	}
-	const char* getValue () const { return m_pValue; }
+	inline const char* getValue () const { return m_pValue; }
 	virtual std::size_t parse()
 	{
 		if (!m_pValue)
@@ -158,17 +139,17 @@ public:
 	}
 };
 
-class JSONString : public virtual JSONElement
+class JSONString : public JSONElement
 {
 	std::string m_Value;
 public:
-	JSONString (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos)
+	JSONString (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos, tString)
 	{
 	}
-	JSONString () : JSONElement()
+	JSONString () : JSONElement(tString)
 	{
 	}
-	const std::string& getValue () const { return m_Value; }
+	inline const std::string& getValue () const { return m_Value; }
 	operator std::string() { return m_Value; }
 	virtual std::size_t parse()
 	{
@@ -208,19 +189,19 @@ template <typename T> struct NumberData
 };
 template <typename T> const char* NumberData<T>::m_pValue = "0123456789";
 
-class JSONNumber : public virtual JSONElement
+class JSONNumber : public JSONElement
 {
 	double m_Value;
 	NumberData<void> m_Numbers;
 public:
-	JSONNumber (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos)
+	JSONNumber (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos, tNumber)
 		, m_Value(0)
 	{
 	}
-	JSONNumber() : JSONElement(), m_Value(0.0) 
+	JSONNumber() : JSONElement(tNumber), m_Value(0.0) 
 	{
 	}
-	double getValue () const { return m_Value; }
+	inline double getValue () const { return m_Value; }
 
 	operator double() {	return m_Value;	}
 
@@ -269,19 +250,13 @@ public:
 class JSONObject;
 class JSONArray;
 
-template <typename T> class JSONGroup : virtual public JSONElement
+template <typename T> class JSONGroup :  public JSONElement
 {
 protected:
 
 	template <typename valueT> JSONElement* ParseType (std::size_t start_pos, const char* pStaticValue);
 	template <typename valueT> JSONElement* ParseType (std::size_t start_pos);
-	template <typename valueT> JSONElement* ParseType (
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
-		std::unique_ptr
-#else
-		std::auto_ptr
-#endif
-		<valueT> pValue);
+	template <typename valueT> JSONElement* ParseType (valueT& );
 
 	JSONElement* parseValue()
 	{
@@ -327,28 +302,41 @@ protected:
 		return pValue; // Bad format of object or unknown value type
 	}
 
+	//JSONGroup (const JSONGroup&);
 public:
-	JSONGroup () 
+	JSONGroup () : JSONElement (tGroup)
 	{
 	}
-	JSONGroup (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos)
+	JSONGroup (const std::string& sJSON, std::size_t pos, Type type ) : JSONElement (sJSON, pos, type)
 	{
 	}
 };
 
-class JSONArray : public virtual JSONGroup<void>
+class JSONArray : public JSONGroup<void>
 {
 	typedef std::vector<const JSONElement*> ArrayType;
 
 	ArrayType m_Values;
 
-	JSONArray (JSONArray&) {}
+	//JSONArray (const JSONArray&);
 public:
-	JSONArray () 
+	JSONArray (JSONArray& arr) : JSONGroup<void> (arr.m_sJSON, arr.m_Pos, tArray) 
+	{
+		m_Values = arr.m_Values;
+		arr.m_Values.clear();
+	}
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
+	JSONArray (JSONArray&& arr) noexcept : JSONGroup<void> (arr.m_sJSON, arr.m_Pos, tArray)
+	{
+		m_Values = std::move(arr.m_Values);
+	}
+#endif
+	JSONArray () : JSONGroup<void> ()
 	{
 	}
-	JSONArray (const std::string& sJSON, std::size_t pos) : JSONElement (sJSON, pos), JSONGroup<void> (sJSON, pos)
+	JSONArray (const std::string& sJSON, std::size_t pos) : JSONGroup<void> (sJSON, pos, tArray)
 	{
+		m_Values.reserve(20);
 	}
 	virtual ~JSONArray()
 	{
@@ -356,7 +344,7 @@ public:
 			if (m_Values[i])
 				delete m_Values[i];
 	}
-	const ArrayType& getValues () const { return m_Values; }
+	inline const ArrayType& getValues () const { return m_Values; }
 
 	const JSONElement& operator[](const ArrayType::size_type _idx) const
 	{
@@ -415,9 +403,13 @@ public:
 	}
 };
 
-class JSONObject : public virtual JSONGroup<void>
+class JSONObject : public JSONGroup<void>
 {
-	typedef std::map <std::string, const JSONElement*> DOMType;
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
+	typedef std::unordered_map <std::string, const JSONElement*> DOMType;
+#else
+	typedef std::map <const std::string, const JSONElement*> DOMType;
+#endif
 	DOMType m_Values;
 
    class cDeleteValue {
@@ -429,10 +421,21 @@ class JSONObject : public virtual JSONGroup<void>
 	   }
    };
 
-    JSONObject (JSONObject& cObj);
+   //JSONObject (const JSONObject& cObj);
 public:
-	JSONObject () { }
-	JSONObject (const std::string& sJSON, std::size_t pos) :  JSONElement (sJSON, pos), JSONGroup<void> (sJSON, pos)
+	JSONObject (JSONObject& cObj) : JSONGroup<void> (cObj.m_sJSON, cObj.m_Pos, tObject) 
+	{
+		m_Values = cObj.m_Values;
+		cObj.m_Values.clear();
+	}
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
+	JSONObject (JSONObject&& cObj) noexcept : JSONGroup<void> (cObj.m_sJSON, cObj.m_Pos, tObject)
+	{
+		m_Values = std::move(cObj.m_Values);
+	}
+#endif
+	JSONObject () : JSONGroup<void> () { }
+	JSONObject (const std::string& sJSON, std::size_t pos) :  JSONGroup<void> (sJSON, pos, tObject)
 	{
 	}
 	virtual ~JSONObject ()
@@ -440,26 +443,21 @@ public:
 		cDeleteValue dv;
 		std::for_each (m_Values.begin(), m_Values.end(), dv);
 	}
-	const DOMType& getValues () const { return m_Values; }
+	inline const DOMType& getValues () const { return m_Values; }
 
-	const JSONObject& GetObject (const char* name) const
+	inline const JSONObject& GetObject (const std::string& name) const
 	{
-		if (name)
-		{
-			const JSONElement* pElement = const_cast<DOMType&>(m_Values)[name];
-			if (pElement)
-				return dynamic_cast<const JSONObject&>(*pElement);
-		}
+		const JSONElement* pElement = const_cast<DOMType&>(m_Values)[name];
+		if (pElement)
+			return static_cast<const JSONObject&>(*pElement);
 		return get_EmptyObject();
 	}
-	const JSONElement& operator[](const char* name) const
+	inline const JSONElement& operator[](const std::string& name) const
 	{
-		if (name)
-		{
-			const JSONElement* pElement = const_cast<DOMType&>(m_Values)[name];
-			if (pElement)
-				return *pElement;
-		}
+
+		const JSONElement* pElement = const_cast<DOMType&>(m_Values)[name];
+		if (pElement)
+			return *pElement;
 		return get_EmptyObject();
 	}
 	virtual std::size_t parse()
@@ -526,92 +524,80 @@ template <typename T> T JSONEmpty<T>::m_Empty;
 
 template <class Ti> typename enable_if< is_same<Ti, std::string>::value, std::string>::type JSONElement::getTypeValue() const
 {
-	if (typeid(*this) != typeid(JSONString))
+	if (this->m_Type != tString)
 		return "";
-	return dynamic_cast<const JSONString&>(*this).getValue();
+	return static_cast<const JSONString&>(*this).getValue();
 }
 template <class Ti> typename enable_if< is_same<Ti, const char*>::value, const char*>::type JSONElement::getTypeValue() const
 {
-	if (typeid(*this) != typeid(JSONStaticString))
+	if (this->m_Type != tStaticString)
 		return "";
-	return dynamic_cast<const JSONStaticString&>(*this).getValue();
+	return static_cast<const JSONStaticString&>(*this).getValue();
 }
 template <class Ti> typename enable_if< is_same<Ti, bool>::value, bool>::type JSONElement::getTypeValue() const
 {
-	if (typeid(*this) != typeid(JSONStaticString))
+	if (this->m_Type != tStaticString)
 		return false;
-	const char* ps = dynamic_cast<const JSONStaticString&>(*this).getValue();
+	const char* ps = static_cast<const JSONStaticString&>(*this).getValue();
 	if (std::string(ps) == "true")
 		return true;
 	return false;
 }
 template <class Ti> typename enable_if< is_same<Ti, double>::value, double>::type JSONElement::getTypeValue() const
 {
-	if (typeid(*this) != typeid(JSONNumber))
-		return 0;
-	return dynamic_cast<const JSONNumber&>(*this).getValue();
+	if (this->m_Type != tNumber)
+			return 0;
+	return static_cast<const JSONNumber&>(*this).getValue();
 }
 
 template <typename T>
 template <typename valueT> JSONElement*  JSONGroup<T>::ParseType (std::size_t start_pos, const char* pStaticValue)
 {
-	return ParseType<valueT>(
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
-		std::unique_ptr
-#else
-		std::auto_ptr
-#endif
-		<valueT> (new valueT (m_sJSON, start_pos, pStaticValue)));
+	valueT value(m_sJSON, start_pos, pStaticValue);
+	return ParseType (value);
 }
 template <typename T>
 template <typename valueT> JSONElement* JSONGroup<T>::ParseType (std::size_t start_pos)
 {
-	return ParseType<valueT>(
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
-		std::unique_ptr
-#else
-		std::auto_ptr
-#endif
-		<valueT> (new valueT (m_sJSON, start_pos)));
+	valueT value (m_sJSON, start_pos);
+	return ParseType (value);
 }
 template <typename T>
-template <typename valueT> JSONElement* JSONGroup<T>::ParseType (
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
-	std::unique_ptr
-#else
-	std::auto_ptr
-#endif
-	<valueT> pValue)
+template <typename valueT> JSONElement* JSONGroup<T>::ParseType (valueT& pValue)
 {
-	m_Pos = pValue->parse();
+	m_Pos = pValue.parse();
 	if (m_Pos == std::string::npos)
 		return NULL;
-	return dynamic_cast<JSONElement*> (pValue.release());
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER > 1900) 
+	return static_cast<JSONElement*> (new valueT(std::move(pValue)));
+#else
+	return static_cast<JSONElement*> (new valueT(pValue));
+#endif
 }
 
-inline JSONElement::operator JSONObject& () const 
+inline JSONElement::operator JSONObject& () const
 {	
-	if (typeid(*this) != typeid(JSONObject))
+	if (this->m_Type != tObject)
 		return this->m_EmptyObject.m_Empty;
-	return dynamic_cast<JSONObject&>(const_cast<JSONElement&>(*this));
+	return static_cast<JSONObject&>(const_cast<JSONElement&>(*this));
 }
-inline const JSONElement& JSONElement::operator[](const char* name) const 
+inline const JSONElement& JSONElement::operator[](const std::string& name) const
 {	
-	if (typeid(*this) != typeid(JSONObject))
+	if (this->m_Type != tObject)
 		return this->m_EmptyObject.m_Empty;
-	return dynamic_cast<const JSONObject&>(*this)[name];
+	return static_cast<const JSONObject&>(*this)[name];
 }
-inline const JSONElement& JSONElement::operator[](const int idx) const 
+inline const JSONElement& JSONElement::operator[](const int idx) const
 { 
-	if (typeid(*this) != typeid(JSONArray))
+	if (this->m_Type != tArray)
 		return this->m_EmptyArray.m_Empty;
-	return dynamic_cast<const JSONArray&>(*this)[idx];
+	return static_cast<const JSONArray&>(*this)[idx];
 }
 inline JSONElement::operator JSONArray& () const
 { 	
-	if (typeid(*this) != typeid(JSONArray))
+	if (this->m_Type != tArray)
 		return this->m_EmptyArray.m_Empty;
-	return dynamic_cast<JSONArray&>(const_cast<JSONElement&>(*this));
+	return static_cast<JSONArray&>(const_cast<JSONElement&>(*this));
 }
 
 #endif // __JSON_HPP
