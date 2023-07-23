@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/AndreyGRSV/SVJSON.svg?branch=master)](https://travis-ci.org/AndreyGRSV/SVJSON)
 [![Build status](https://ci.appveyor.com/api/projects/status/toagb25p1ym5pxiw?svg=true)](https://ci.appveyor.com/project/AndreyGRSV/svjson)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4042f802f4da44179c5827d149a773f5)](https://www.codacy.com/manual/AndreyGRSV/SVJSON?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AndreyGRSV/SVJSON&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/b736701833204648957b48b4c7673a16)](https://app.codacy.com/gh/AndreyGRSV/SVJSON/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![GitHub](https://img.shields.io/github/license/AndreyGRSV/SVJSON?color=blue)](https://github.com/AndreyGRSV/SVJSON/blob/master/LICENSE)
 [![Minimum C++ Standard](https://img.shields.io/badge/standard-C%2B%2B98-blue)](https://img.shields.io/badge/standard-C%2B%2B98-blue)
 
