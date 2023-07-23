@@ -1,6 +1,5 @@
 # SVJSON
 
-[![Build Status](https://travis-ci.org/AndreyGRSV/SVJSON.svg?branch=master)](https://travis-ci.org/AndreyGRSV/SVJSON)
 [![Build status](https://ci.appveyor.com/api/projects/status/toagb25p1ym5pxiw?svg=true)](https://ci.appveyor.com/project/AndreyGRSV/svjson)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b736701833204648957b48b4c7673a16)](https://app.codacy.com/gh/AndreyGRSV/SVJSON/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![GitHub](https://img.shields.io/github/license/AndreyGRSV/SVJSON?color=blue)](https://github.com/AndreyGRSV/SVJSON/blob/master/LICENSE)
